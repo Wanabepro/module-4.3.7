@@ -35,10 +35,11 @@ body {
   width: 100%;
   background-color: #e3e3e3;
   border: 2px solid #000;
+  text-align: left;
   font-size: 30px;
   padding: 0 15px;
-  transition: background-color 300ms;
   outline: none;
+  transition: background-color 300ms;
 }
 
 .search__list-item:focus,
