@@ -1,8 +1,8 @@
 const input = document.querySelector('.search__input')
 const searchList = document.querySelector('.search__list')
-const reposList = document.querySelector('.repos-list')
+const repositoriesList = document.querySelector('.repositories-list')
 
-const inputHandlerDebounced = debounce(inputHandler, 300)
+const inputHandlerDebounced = debounce(inputHandler, 500)
 
 input.addEventListener('input', e => inputHandlerDebounced(e))
 
@@ -11,63 +11,71 @@ function inputHandler(e) {
     fetch(`https://api.github.com/search/repositories?q=${e.target.value}&sort=stars&order=desc&per_page=5`)
       .then(response => response.json())
       .then(data => {
-        const repos = data.items
+        const repositories = data.items
+        if (repositories.length) {
+          const fragment = document.createDocumentFragment();
 
-        const fragment = document.createDocumentFragment();
+          for (let repository of repositories) {
+            const li = document.createElement('li')
+            const button = document.createElement('button')
+            button.classList.add('search__list-item')
+            button.textContent = repository.name
+            button.addEventListener('click', () => {
+              createRepositoryCard(repository.name, repository.owner.login, repository.stargazers_count)
+              input.value = ''
+              searchList.innerHTML = ''
+            })
+            li.appendChild(button)
+            fragment.appendChild(li)
+          }
 
-        for (let repo of repos) {
-          const li = document.createElement('li')
-          const button = document.createElement('button')
-          button.classList.add('search__list-item')
-          button.textContent = repo.name
-          button.addEventListener('click', () => {
-            createRepoCard(repo.name, repo.owner.login, repo.stargazers_count)
-            input.value = ''
-            searchList.innerHTML = ''
-          })
-          li.appendChild(button)
-          fragment.appendChild(li)
+          searchList.innerHTML = ''
+          searchList.appendChild(fragment)
+        } else {
+          const div = document.createElement('div')
+          div.classList.add('search__message')
+          div.textContent = 'Nothing found'
+
+          searchList.innerHTML = ''
+          searchList.appendChild(div)
         }
-
-        searchList.innerHTML = ''
-        searchList.appendChild(fragment)
       })
   } else {
     searchList.innerHTML = ''
   }
 }
 
-function createRepoCard(name, owner, stars) {
-  const repo = document.createElement('li')
-  repo.classList.add('repo')
+function createRepositoryCard(name, owner, stars) {
+  const repository = document.createElement('li')
+  repository.classList.add('repository')
 
-  const repoInfo = document.createElement('div')
-  repoInfo.classList.add('repo__info')
+  const repositoryInfo = document.createElement('div')
+  repositoryInfo.classList.add('repository__info')
 
-  const repoRemoveButton = document.createElement('button')
-  repoRemoveButton.classList.add('repo__remove-button')
-  repoRemoveButton.addEventListener('click', () => repo.remove())
+  const repositoryRemoveButton = document.createElement('button')
+  repositoryRemoveButton.classList.add('repository__remove-button')
+  repositoryRemoveButton.addEventListener('click', () => repository.remove())
 
-  const repoName = document.createElement('p')
-  repoName.classList.add('repo__name')
-  repoName.textContent = `Name: ${name}`
+  const repositoryName = document.createElement('p')
+  repositoryName.classList.add('repository__name')
+  repositoryName.textContent = `Name: ${name}`
 
-  const repoOwner = document.createElement('p')
-  repoOwner.classList.add('repo__owner')
-  repoOwner.textContent = `Owner: ${owner}`
+  const repositoryOwner = document.createElement('p')
+  repositoryOwner.classList.add('repository__owner')
+  repositoryOwner.textContent = `Owner: ${owner}`
 
-  const repoStars = document.createElement('p')
-  repoStars.classList.add('repo__stars')
-  repoStars.textContent = `Stars: ${stars}`
+  const repositoryStars = document.createElement('p')
+  repositoryStars.classList.add('repository__stars')
+  repositoryStars.textContent = `Stars: ${stars}`
 
-  repoInfo.appendChild(repoName)
-  repoInfo.appendChild(repoOwner)
-  repoInfo.appendChild(repoStars)
+  repositoryInfo.appendChild(repositoryName)
+  repositoryInfo.appendChild(repositoryOwner)
+  repositoryInfo.appendChild(repositoryStars)
 
-  repo.appendChild(repoInfo)
-  repo.appendChild(repoRemoveButton)
+  repository.appendChild(repositoryInfo)
+  repository.appendChild(repositoryRemoveButton)
 
-  reposList.insertAdjacentElement('afterbegin', repo)
+  repositoriesList.insertAdjacentElement('afterbegin', repository)
 }
 
 function debounce(func, timeout) {
